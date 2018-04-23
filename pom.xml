@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.aries</groupId>
+    <artifactId>realtimeapi</artifactId>
+    <version>1.0.0</version>
+    <packaging>jar</packaging>
+
+    <name>realtimeapi</name>
+    <description>Realtime API</description>
+
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>1.5.12.RELEASE</version>
+        <relativePath/>
+    </parent>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <java.version>1.7</java.version>
+
+        <!-- TODO: 플러그인 jar 파일 생성 디렉토리 및 파일 네이밍 설정 -->
+        <plugin.output.directoryName>${project.basedir}/dist</plugin.output.directoryName>
+        <plugin.output.fileName>${project.artifactId}_${env}-${project.version}</plugin.output.fileName>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- TODO: 로컬 메이븐 저장소에 추가되어 있어야 함 (차후 온라인에 공개할 예정) -->
+        <dependency>
+            <groupId>com.aries</groupId>
+            <artifactId>extension</artifactId>
+            <version>1.0.1</version>
+        </dependency>
+
+        <!-- TODO: 직접 사용하는 라이브러리들은 여기에 디펜던시를 추가해주면 된다. -->
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>2.6</version>
+        </dependency>
+
+    </dependencies>
+
+    <profiles>
+        <!-- 독립적으로 실행되는 플러그인 jar 파일 -->
+        <profile>
+            <id>local</id>
+            <properties>
+                <env>local</env>
+            </properties>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <dependencies>
+                <dependency>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-starter-web</artifactId>
+                </dependency>
+            </dependencies>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.springframework.boot</groupId>
+                        <artifactId>spring-boot-maven-plugin</artifactId>
+                        <configuration>
+                            <outputDirectory>${plugin.output.directoryName}</outputDirectory>
+                            <finalName>${plugin.output.fileName}</finalName>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <goals>
+                                    <goal>repackage</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <!-- 제니퍼에 실험실로 추가할 수 있는 jar 파일 -->
+        <profile>
+            <id>jennifer</id>
+            <properties>
+                <env>jennifer</env>
+            </properties>
+            <dependencies>
+                <dependency>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-starter-web</artifactId>
+                    <scope>provided</scope>
+                </dependency>
+            </dependencies>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-shade-plugin</artifactId>
+                        <configuration>
+                            <artifactSet>
+                                <excludes>
+                                    <exclude>com.aries:extension</exclude>
+                                    <exclude>org.springframework:*</exclude>
+                                    <exclude>javax.servlet:*</exclude>
+                                    <exclude>org.apache.velocity:*</exclude>
+                                    <exclude>org.apache.commons:*</exclude>
+                                    <exclude>org.slf4j:*</exclude>
+                                    <exclude>org.json:*</exclude>
+                                </excludes>
+                            </artifactSet>
+                            <outputFile>${plugin.output.directoryName}/${plugin.output.fileName}.${project.packaging}</outputFile>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>shade</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
+</project>
