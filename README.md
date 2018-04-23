@@ -14,6 +14,6 @@ Execute the following in the Jennifer management screen.
  
 Different versions of the server support different plug-in versions.
  
-| Plugin version           | Jennifer server version |
-| ------------- |:-------------:|
-| 1.0.0       | Greater than or equal to version 5.3.2.3 |
+| Plugin version | Jennifer server version | Java version |
+| ------------- |-------------|-------------|
+| 1.0.0       | Greater than or equal to version 5.3.2.3 | 1.7 or 1.8
