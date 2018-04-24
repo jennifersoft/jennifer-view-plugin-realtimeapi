@@ -23,8 +23,8 @@ import java.util.Set;
 
 @Controller
 public class RealtimeAPIController extends PluginController {
-//    private static final String JENNIFER_URL = "http://support.jennifersoft.com:27900"; // TODO: 플러그인 독립 실행시에만 URL 지정하기
-    private static final String JENNIFER_URL = null;
+    private static final String JENNIFER_URL = "http://support.jennifersoft.com:27900"; // TODO: 플러그인 독립 실행시에만 URL 지정하기
+//    private static final String JENNIFER_URL = null;
 
     @RequestMapping(value = {"/realtimeapi/domainmerged"}, method = RequestMethod.GET)
     @ResponseBody
