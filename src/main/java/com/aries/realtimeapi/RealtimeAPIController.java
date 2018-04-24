@@ -23,12 +23,13 @@ import java.util.Set;
 
 @Controller
 public class RealtimeAPIController extends PluginController {
-    private static final String JENNIFER_URL = "http://support.jennifersoft.com:27900"; // TODO: 플러그인 독립 실행시에만 URL 지정하기
-//    private static final String JENNIFER_URL = null;
+//    private static final String JENNIFER_URL = "http://support.jennifersoft.com:27900"; // TODO: 플러그인 독립 실행시에만 URL 지정하기
+    private static final String JENNIFER_URL = null;
 
     @RequestMapping(value = {"/realtimeapi/domainmerged"}, method = RequestMethod.GET)
     @ResponseBody
-    public Map<String, Integer> getMainPage(@RequestParam(required=false) short[] domain_id, HttpServletRequest request) throws IOException {
+    public Map<String, Object> getMainPage(@RequestParam(required=false) short[] domain_id, HttpServletRequest request) throws IOException {
+        Map<String, Object> result = new HashMap<String, Object>();
         String uri = JENNIFER_URL == null ? getServerURL(request) : JENNIFER_URL;
 
         // 도메인 필터를 위한 Set 컬렉션 설정
@@ -40,12 +41,12 @@ public class RealtimeAPIController extends PluginController {
         }
 
         // API 응답 데이터
-        Map<String, Integer> result = new HashMap<String, Integer>();
-        result.put("total", 0);
-        result.put("range0", 0);
-        result.put("range1", 0);
-        result.put("range2", 0);
-        result.put("range3", 0);
+        Map<String, Integer> activeServiceMap = new HashMap<String, Integer>();
+        activeServiceMap.put("activeService", 0);
+        activeServiceMap.put("range0", 0);
+        activeServiceMap.put("range1", 0);
+        activeServiceMap.put("range2", 0);
+        activeServiceMap.put("range3", 0);
 
         // JENNIFER API 호출
         URL url = new URL(uri + "/api/realtime/domain");
@@ -67,13 +68,15 @@ public class RealtimeAPIController extends PluginController {
             short sid = (short) obj.getInt("domainId");
 
             if(domainSet.size() == 0 || domainSet.contains(sid)) {
-                result.put("total", result.get("total") + obj.getInt("activeService"));
-                result.put("range0", result.get("range0") + obj.getInt("activeServiceRandgeCount0"));
-                result.put("range1", result.get("range1") + obj.getInt("activeServiceRandgeCount1"));
-                result.put("range2", result.get("range2") + obj.getInt("activeServiceRandgeCount2"));
-                result.put("range3", result.get("range3") + obj.getInt("activeServiceRandgeCount3"));
+                activeServiceMap.put("activeService", activeServiceMap.get("activeService") + obj.getInt("activeService"));
+                activeServiceMap.put("range0", activeServiceMap.get("range0") + obj.getInt("activeServiceRandgeCount0"));
+                activeServiceMap.put("range1", activeServiceMap.get("range1") + obj.getInt("activeServiceRandgeCount1"));
+                activeServiceMap.put("range2", activeServiceMap.get("range2") + obj.getInt("activeServiceRandgeCount2"));
+                activeServiceMap.put("range3", activeServiceMap.get("range3") + obj.getInt("activeServiceRandgeCount3"));
             }
         }
+
+        result.put("RealtimeDomainMergedData", activeServiceMap);
 
         return result;
     }
