@@ -5,7 +5,7 @@
 
     <groupId>com.aries</groupId>
     <artifactId>realtimeapi</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
     <packaging>jar</packaging>
 
     <name>realtimeapi</name>
@@ -39,7 +39,7 @@
         <dependency>
             <groupId>com.aries</groupId>
             <artifactId>extension</artifactId>
-            <version>1.0.1</version>
+            <version>1.0.6</version>
         </dependency>
 
         <!-- TODO: 직접 사용하는 라이브러리들은 여기에 디펜던시를 추가해주면 된다. -->
@@ -47,6 +47,13 @@
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
             <version>2.6</version>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/org.json/json -->
+        <dependency>
+            <groupId>org.json</groupId>
+            <artifactId>json</artifactId>
+            <version>20180130</version>
         </dependency>
 
     </dependencies>
@@ -108,13 +115,29 @@
                         <configuration>
                             <artifactSet>
                                 <excludes>
-                                    <exclude>com.aries:extension</exclude>
-                                    <exclude>org.springframework:*</exclude>
+                                    <exclude>com.aries:extension:*</exclude>
                                     <exclude>javax.servlet:*</exclude>
+                                    <exclude>javax.xml.stream:*</exclude>
+                                    <exclude>org.springframework:*</exclude>
                                     <exclude>org.apache.velocity:*</exclude>
                                     <exclude>org.apache.commons:*</exclude>
                                     <exclude>org.slf4j:*</exclude>
                                     <exclude>org.json:*</exclude>
+                                    <exclude>org.reflections:*</exclude>
+                                    <exclude>org.quartz-scheduler:*</exclude>
+                                    <exclude>com.fasterxml.jackson.core:*</exclude>
+                                    <exclude>com.thoughtworks.xstream:*</exclude>
+                                    <exclude>com.google.code.gson:*</exclude>
+                                    <exclude>com.google.guava:*</exclude>
+                                    <exclude>com.google.http-client:*</exclude>
+                                    <exclude>com.navercorp.lucy:*</exclude>
+                                    <exclude>commons-fileupload:*</exclude>
+                                    <exclude>commons-codec:*</exclude>
+                                    <exclude>io.jsonwebtoken:*</exclude>
+                                    <exclude>httpunit:*</exclude>
+                                    <exclude>rhino:*</exclude>
+                                    <exclude>gdata:*</exclude>
+                                    <exclude>whois:*</exclude>
                                 </excludes>
                             </artifactSet>
                             <outputFile>${plugin.output.directoryName}/${plugin.output.fileName}.${project.packaging}</outputFile>

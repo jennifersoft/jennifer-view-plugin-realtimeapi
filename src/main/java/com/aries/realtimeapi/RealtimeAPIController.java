@@ -1,6 +1,7 @@
 package com.aries.realtimeapi;
 
 import com.aries.extension.starter.PluginController;
+import com.aries.extension.util.PropertyUtil;
 import org.apache.commons.io.IOUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -23,14 +24,13 @@ import java.util.Set;
 
 @Controller
 public class RealtimeAPIController extends PluginController {
-//    private static final String JENNIFER_URL = "http://support.jennifersoft.com:27900"; // TODO: 플러그인 독립 실행시에만 URL 지정하기
-    private static final String JENNIFER_URL = null;
+    private static final String URL = PropertyUtil.getValue("realtimeapi", "url", "http://127.0.0.1:7900");
+    private static final String TOKEN = PropertyUtil.getValue("realtimeapi", "token", "OZJV1tGOUp1");
 
     @RequestMapping(value = {"/realtimeapi/domainmerged"}, method = RequestMethod.GET)
     @ResponseBody
     public Map<String, Object> getMainPage(@RequestParam(required=false) short[] domain_id, HttpServletRequest request) throws IOException {
         Map<String, Object> result = new HashMap<String, Object>();
-        String uri = JENNIFER_URL == null ? getServerURL(request) : JENNIFER_URL;
 
         // 도메인 필터를 위한 Set 컬렉션 설정
         Set<Short> domainSet = new HashSet<Short>();
@@ -49,7 +49,7 @@ public class RealtimeAPIController extends PluginController {
         activeServiceMap.put("range3", 0);
 
         // JENNIFER API 호출
-        URL url = new URL(uri + "/api/realtime/domain");
+        URL url = new URL(URL + "/api/realtime/domain?token=" + TOKEN);
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
         conn.setRequestMethod("GET");
 
@@ -57,32 +57,34 @@ public class RealtimeAPIController extends PluginController {
         InputStream in = new BufferedInputStream(conn.getInputStream());
         String jsonStr = IOUtils.toString(in, "UTF-8");
         JSONObject jsonObj = new JSONObject(jsonStr);
-        JSONArray jsonArr = jsonObj.getJSONArray("RealtimeDomainData");
 
-        // httpClient 객체 닫기
-        conn.disconnect();
+        if(jsonObj.has("RealtimeDomainData")) {
+            JSONArray jsonArr = jsonObj.getJSONArray("RealtimeDomainData");
 
-        // 최종 데이터 머지하기
-        for(int i = 0; i < jsonArr.length(); i++) {
-            JSONObject obj = jsonArr.getJSONObject(i);
-            short sid = (short) obj.getInt("domainId");
+            // httpClient 객체 닫기
+            conn.disconnect();
 
-            if(domainSet.size() == 0 || domainSet.contains(sid)) {
-                activeServiceMap.put("activeService", activeServiceMap.get("activeService") + obj.getInt("activeService"));
-                activeServiceMap.put("range0", activeServiceMap.get("range0") + obj.getInt("activeServiceRandgeCount0"));
-                activeServiceMap.put("range1", activeServiceMap.get("range1") + obj.getInt("activeServiceRandgeCount1"));
-                activeServiceMap.put("range2", activeServiceMap.get("range2") + obj.getInt("activeServiceRandgeCount2"));
-                activeServiceMap.put("range3", activeServiceMap.get("range3") + obj.getInt("activeServiceRandgeCount3"));
+            // 최종 데이터 머지하기
+            for (int i = 0; i < jsonArr.length(); i++) {
+                JSONObject obj = jsonArr.getJSONObject(i);
+                short sid = (short) obj.getInt("domainId");
+
+                if (domainSet.size() == 0 || domainSet.contains(sid)) {
+                    activeServiceMap.put("activeService", activeServiceMap.get("activeService") + obj.getInt("activeService"));
+                    activeServiceMap.put("range0", activeServiceMap.get("range0") + obj.getInt("activeServiceRandgeCount0"));
+                    activeServiceMap.put("range1", activeServiceMap.get("range1") + obj.getInt("activeServiceRandgeCount1"));
+                    activeServiceMap.put("range2", activeServiceMap.get("range2") + obj.getInt("activeServiceRandgeCount2"));
+                    activeServiceMap.put("range3", activeServiceMap.get("range3") + obj.getInt("activeServiceRandgeCount3"));
+                }
+            }
+
+            result.put("RealtimeDomainMergedData", activeServiceMap);
+        } else {
+            if(jsonObj.has("exception")) {
+                return jsonObj.toMap();
             }
         }
 
-        result.put("RealtimeDomainMergedData", activeServiceMap);
-
         return result;
-    }
-
-    private String getServerURL(HttpServletRequest request) {
-        return request.getScheme() + "://" + request.getServerName() +
-                (request.getServerPort()==80?"":":"+request.getServerPort());
     }
 }
