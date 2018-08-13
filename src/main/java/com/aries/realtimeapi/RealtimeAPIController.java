@@ -6,12 +6,10 @@ import org.apache.commons.io.IOUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -25,7 +23,7 @@ import java.util.Set;
 @Controller
 public class RealtimeAPIController extends PluginController {
     private static final String URL = PropertyUtil.getValue("realtimeapi", "url", "http://127.0.0.1:7900");
-    private static final String TOKEN = PropertyUtil.getValue("realtimeapi", "token", "OZJV1tGOUp1");
+    private static final String TOKEN = PropertyUtil.getValue("realtimeapi", "token", "");
 
     @RequestMapping(value = {"/realtimeapi/domainmerged"}, method = RequestMethod.GET)
     @ResponseBody
@@ -58,8 +56,8 @@ public class RealtimeAPIController extends PluginController {
         String jsonStr = IOUtils.toString(in, "UTF-8");
         JSONObject jsonObj = new JSONObject(jsonStr);
 
-        if(jsonObj.has("RealtimeDomainData")) {
-            JSONArray jsonArr = jsonObj.getJSONArray("RealtimeDomainData");
+        if(jsonObj.has("result")) {
+            JSONArray jsonArr = jsonObj.getJSONArray("result");
 
             // httpClient 객체 닫기
             conn.disconnect();
@@ -71,10 +69,10 @@ public class RealtimeAPIController extends PluginController {
 
                 if (domainSet.size() == 0 || domainSet.contains(sid)) {
                     activeServiceMap.put("activeService", activeServiceMap.get("activeService") + obj.getInt("activeService"));
-                    activeServiceMap.put("range0", activeServiceMap.get("range0") + obj.getInt("activeServiceRandgeCount0"));
-                    activeServiceMap.put("range1", activeServiceMap.get("range1") + obj.getInt("activeServiceRandgeCount1"));
-                    activeServiceMap.put("range2", activeServiceMap.get("range2") + obj.getInt("activeServiceRandgeCount2"));
-                    activeServiceMap.put("range3", activeServiceMap.get("range3") + obj.getInt("activeServiceRandgeCount3"));
+                    activeServiceMap.put("range0", activeServiceMap.get("range0") + obj.getInt("activeServiceRangeCount0"));
+                    activeServiceMap.put("range1", activeServiceMap.get("range1") + obj.getInt("activeServiceRangeCount1"));
+                    activeServiceMap.put("range2", activeServiceMap.get("range2") + obj.getInt("activeServiceRangeCount2"));
+                    activeServiceMap.put("range3", activeServiceMap.get("range3") + obj.getInt("activeServiceRangeCount3"));
                 }
             }
 
@@ -84,6 +82,15 @@ public class RealtimeAPIController extends PluginController {
                 return jsonObj.toMap();
             }
         }
+
+        return result;
+    }
+
+    @ExceptionHandler(Exception.class)
+    @ResponseBody
+    public Map<String, Object> handleException(Exception e, HttpServletRequest request, HttpServletResponse response) {
+        Map<String, Object> result = new HashMap<String, Object>();
+        result.put("exception", e.toString());
 
         return result;
     }
